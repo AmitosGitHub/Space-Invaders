@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/main.css" />
+    <title>Space Invaders</title>
+  </head>
+  <body onload="onInit()" onkeydown="onKeyDown(event)">
+    <header>
+      <h1>Space Invaders</h1>
+    </header>
+
+    <main>
+      <div class="main-btn-control">
+        <div class="level">
+          <button onclick="onLevel('Beginner')">Beginner</button>
+          <button onclick="onLevel('Intermediate')">Intermediate</button>
+          <button onclick="onLevel('Expert')">Expert</button>
+        </div>
+        <div class="start-stop-game">
+          <button onclick="onStart()">PLAY</button>
+          <button onclick="onStop()">STOP</button>
+          <button onclick="onRestart()">RESTART</button>
+        </div>
+        <div class="score">
+          <h2>SCORE: <span>00</span></h2>
+        </div>
+      </div>
+
+      <table></table>
+
+      <div class="main-btn-game"></div>
+
+      <div class="modal">
+        <h3></h3>
+        <button onclick="onRestart()">Restart</button>
+      </div>
+    </main>
+
+    <footer></footer>
+
+    <script src="js/util.js"></script>
+    <script src="js/hero.js"></script>
+    <script src="js/alien.js"></script>
+    <script src="js/game.js"></script>
+  </body>
+</html>

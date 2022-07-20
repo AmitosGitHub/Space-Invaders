@@ -1,0 +1,105 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0px;
+  padding: 0px;
+  background-image: linear-gradient(to right top, gray, black);
+  width: 100vw;
+  height: 100vh;
+  text-align: center;
+  color: antiquewhite;
+  font-size: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/*------------*/
+header {
+  height: 200px;
+}
+
+main {
+  background-image: url(/img/space-bck.jpeg);
+  background-size: cover;
+  height: 1000px;
+  width: 1000px;
+  border: 2px solid whitesmoke;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+footer {
+  height: 100px;
+}
+/*-----sub-main------*/
+
+.main-btn-control {
+  height: 100px;
+  width: 97%;
+  border: 1px solid whitesmoke;
+  display: flex;
+  justify-content: space-around;
+}
+
+.table {
+  height: 700px;
+  width: 700px;
+  border: 1px solid whitesmoke;
+}
+.main-btn-game {
+  height: 100px;
+  width: 97%;
+  border: 1px solid whitesmoke;
+}
+
+/*----sub-table---*/
+
+.cell {
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgb(102, 98, 98);
+}
+
+.modal {
+  width: 500px;
+  height: 500px;
+  border: 2px solid greenyellow;
+  background-image: linear-gradient(to right top, gray, rgb(182, 171, 171));
+  position: absolute;
+  display: none;
+}
+/*-----main-btn-control ------*/
+.start-stop-game {
+  margin-top: 30px;
+}
+.start-stop-game button {
+  width: 130px;
+  padding: 10px;
+  font-size: 20px;
+  border-radius: 20px;
+  background-image: linear-gradient(to right top, yellow, black);
+}
+
+.level {
+  /* margin-top: 30px; */
+  display: flex;
+  flex-direction: column;
+}
+.level button {
+  background-image: linear-gradient(to right top, rgb(21, 134, 165), black);
+  height: 40px;
+  color: yellow;
+  font-size: 20px;
+  border-radius: 20px;
+}
+
+/*-----helpers ------*/
+img {
+  width: 40px;
+  height: 40px;
+}
