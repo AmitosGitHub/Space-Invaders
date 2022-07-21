@@ -22,7 +22,7 @@ header {
 }
 
 main {
-  background-image: url(/img/space-bck.jpeg);
+  background-image: url(../img/space-bck.jpeg);
   background-size: cover;
   height: 1000px;
   width: 1000px;
@@ -70,7 +70,7 @@ footer {
 .cell {
   width: 50px;
   height: 50px;
-  border: 1px solid rgb(102, 98, 98);
+  /* border: 1px solid rgb(102, 98, 98); */
 }
 
 .modal {
