@@ -1,51 +1,61 @@
 'use strict'
 
-const ALIEN_SPEED = 800
+const ALIEN_SPEED = 500
 var gIntervalAliens
 
-var gAliensTopRowIdx = 0
-var gAliensBottomRowIdx = 2
+var gAliensTopRowIdx = 1
+var gAliensBottomRowIdx = 3
+var gAliensLeftColIdx = 4
+var gAliensRightColIdx = 12
 var gIsAlienFreeze
 var gIsAlienDirection = false
 
-const gAliens = []
+var gAliens = []
+var gSpaceships = []
 
 function createAlien(board, idxI, idxJ) {
   var alien = {
     location: {
-      i: idxI,
+      i: 1 + idxI,
       j: 4 + idxJ,
     },
     currCellContent: SKY,
+    score: 30 - 10 * idxI,
   }
 
   gAliens.push(alien)
   board[alien.location.i][alien.location.j] = ALIEN
+  gGame.aliensCount++
 }
 
 function createAliens(board) {
   for (var i = 0; i < ALIENS_ROW_COUNT; i++) {
     for (var j = 0; j < ALIENS_ROW_LENGTH; j++) {
       createAlien(board, i, j)
-      gGame.aliensCount++
     }
   }
-  console.log('gGame.aliensCount:', gGame.aliensCount)
   return
 }
 
 function moveAliens() {
   if (gIsAlienFreeze) return
+  if (gAliensBottomRowIdx === BOARD_SIZE - 2) {
+    gameOver()
+  }
 
   const firstAlien = gAliens[0]
   const lastAlien = gAliens[gAliens.length - 1]
 
-  if (gIsAlienDirection && lastAlien.location.j < BOARD_SIZE - 1) {
+  if (gIsAlienDirection && gAliensRightColIdx < BOARD_SIZE) {
     toRightAliens()
+    gAliensRightColIdx++
+    gAliensLeftColIdx++
     return
   }
-  if (!gIsAlienDirection && firstAlien.location.j > 0) {
+  if (!gIsAlienDirection && gAliensLeftColIdx > 0) {
     toLeftAliens()
+    gAliensRightColIdx--
+    gAliensLeftColIdx--
     return
   } else {
     //model
@@ -116,7 +126,39 @@ function removeAlien(pos) {
 
     if (alien.location.i === pos.i && alien.location.j === pos.j) {
       gAliens.splice(i, 1)
+      gGame.aliensCount--
       return
     }
   }
+}
+
+function getAlien(pos) {
+  for (var i = 0; i < gAliens.length; i++) {
+    const alien = gAliens[i]
+
+    if (alien.location.i === pos.i && alien.location.j === pos.j) {
+      return gAliens[i]
+    }
+  }
+}
+function createSpaceship() {
+  const randCol = getRandomInt(0, BOARD_SIZE)
+  const location = { i: 0, j: randCol }
+
+  gSpaceships.push({
+    pos: { i: location.i, j: location.j },
+    sign: SPACESHIP,
+    score: 50,
+  })
+}
+
+function removeSpaceships(location) {
+  gBoard[location.i][location.j] = SKY
+  renderCell(location, SKY)
+}
+
+function setAliensFreeze() {
+  gIsAlienFreeze = true
+
+  setTimeout(() => (gIsAlienFreeze = false), 5000)
 }

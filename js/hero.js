@@ -7,6 +7,15 @@ var gLeaser = {
     i: 1,
     j: 1,
   },
+  regular: {
+    sign: 'LASER',
+    speed: 80,
+  },
+  super: {
+    sign: 'SUPER_LASER',
+    speed: 50,
+    count: 3,
+  },
 }
 var gIntervalShoot
 
@@ -17,7 +26,8 @@ function createHero(board) {
       j: 5,
     },
     isShoot: false,
-    life: 1,
+    lives: 3,
+    laser: 'regular',
   }
 
   board[gHero.pos.i][gHero.pos.j] = HERO
@@ -94,31 +104,40 @@ function blinkLaser() {
 
   var nextCell = gBoard[location.i - 1][location.j]
 
+  if (nextCell === SPACESHIP) {
+    setAliensFreeze()
+    clearInterval(gIntervalSpaceshipId)
+    gIntervalSpaceshipId = setInterval(showSpaceship, 10000)
+
+    clearTimeout(gSetTimeId)
+    setScore(50)
+    const spaceship = gSpaceships.splice(0, 1)[0]
+    removeSpaceships({ i: spaceship.pos.i, j: spaceship.pos.j })
+    endBlinkLeaser()
+    return
+  }
   if (nextCell === WALL) {
     endBlinkLeaser()
     return
   }
 
   if (nextCell === ALIEN) {
-    //TODO:kill alien
     setScore(SCORE_ALIEN)
     endBlinkLeaser()
     killAlien(1)
     return
   }
-
-  gBoard[gLeaser.pos.i][gLeaser.pos.j] = SKY
-  renderCell(gLeaser.pos, SKY)
+  updateCell(gLeaser.pos, SKY)
 
   //  Move the laser to new location
   gLeaser.pos.i = location.i - 1
   gLeaser.pos.j = location.j
 
-  gBoard[gLeaser.pos.i][gLeaser.pos.j] = LASER
-  renderCell(gLeaser.pos, LASER)
+  const laser = gHero.laser === 'super' ? SUPER_LASER : LASER
+  updateCell(gLeaser.pos, laser)
 }
 
-function shoot() {
+function shoot(sign) {
   if (gHero.isShoot) return
   gHero.isShoot = true
 
@@ -130,35 +149,108 @@ function shoot() {
   gLeaser.pos.i = location.i
   gLeaser.pos.j = location.j
 
-  gBoard[location.i][location.j] = LASER
-  renderCell(location, LASER)
+  const speed =
+    sign === gLeaser.regular.sign ? gLeaser.regular.speed : gLeaser.super.speed
+  var laser = LASER
+  if (gLeaser.super.count === 0 || sign === gLeaser.regular.sign) {
+    gHero.laser = 'regular'
+  } else {
+    gHero.laser = 'super'
+    laser = SUPER_LASER
+  }
 
-  gIntervalShoot = setInterval(blinkLaser, 80)
+  gBoard[location.i][location.j] = laser
+  renderCell(location, laser)
+
+  gIntervalShoot = setInterval(blinkLaser, speed)
 }
 
 function endBlinkLeaser() {
   clearInterval(gIntervalShoot)
   gHero.isShoot = false
-
-  const location = {
-    i: gLeaser.pos.i,
-    j: gLeaser.pos.j,
-  }
-  gBoard[gLeaser.pos.i][gLeaser.pos.j] = SKY
-  renderCell(gLeaser.pos, SKY)
+  updateCell(gLeaser.pos, SKY)
 }
 
 function killAlien(num) {
-  gGame.aliensCount--
-  gLeaser.pos.i -= 1
-
-  //model
-  removeAlien(gLeaser.pos)
-  gBoard[gLeaser.pos.i][gLeaser.pos.j] = SKY
-  renderCell(gLeaser.pos, SKY)
+  if (num === 1) {
+    gLeaser.pos.i -= 1
+    //model
+    removeAlien(gLeaser.pos)
+    updateCell(gLeaser.pos, SKY)
+  } else if (num === 2) {
+    killAroundAlien(gLeaser.pos)
+  }
 
   if (checkGameOver()) {
-    console.log('checkGameOver():', checkGameOver())
     gameOver()
   }
+}
+
+function BlowUpNeighbors() {
+  clearInterval(gIntervalShoot)
+  gHero.isShoot = false
+
+  gBoard[gLeaser.pos.i][gLeaser.pos.j] = BOOM
+  renderCell(gLeaser.pos, BOOM)
+
+  killAlien(2)
+
+  setTimeout(() => {
+    gBoard[gLeaser.pos.i][gLeaser.pos.j] = SKY
+    renderCell(gLeaser.pos, SKY)
+  }, 300)
+}
+
+function killAroundAlien(pos) {
+  gIsAlienFreeze = true
+  console.log('gGame.aliensCount:', gGame.aliensCount)
+  for (var i = pos.i - 1; i <= pos.i + 1; i++) {
+    if (i < 0 || i > BOARD_SIZE - 1) continue
+    for (var j = pos.j - 1; j <= pos.j + 1; j++) {
+      if (j < 0 || j > BOARD_SIZE - 1) continue
+      if (i === pos.i && pos.j === j) continue
+
+      const cell = gBoard[i][j]
+
+      if (cell === ALIEN) {
+        const location = { i: i, j: j }
+        const alien = getAlien(location)
+        //model
+        setScore(alien.score)
+        removeAlien(location)
+        gBoard[i][j] = SKY
+        //DOM
+        renderCell(location, SKY)
+      }
+    }
+  }
+  gIsAlienFreeze = false
+}
+
+function updateCell(location, element) {
+  gBoard[location.i][location.j] = element
+  renderCell(location, element)
+}
+
+function updateSuperLaser() {
+  if (gLeaser.super.count === 0) return
+  gLeaser.super.count--
+  var srtHTML = ''
+  for (var i = 0; i < gLeaser.super.count; i++) {
+    srtHTML += SUPER_LASER
+  }
+  const elSuper = document.querySelector('.main-btn-game .super-laser span')
+  elSuper.innerText = srtHTML
+}
+
+function updateLives() {
+  if (gHero.lives === 0) return
+  gHero.lives--
+
+  var srtHTML = ''
+  for (var i = 0; i < gHero.lives; i++) {
+    srtHTML += LIVES
+  }
+  const elSuper = document.querySelector('.main-btn-game .lives span')
+  elSuper.innerText = srtHTML
 }

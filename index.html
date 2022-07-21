@@ -9,15 +9,17 @@
   </head>
   <body onload="onInit()" onkeydown="onKeyDown(event)">
     <header>
-      <h1>Space Invaders</h1>
+      <div class="logo">
+        <img class="logo-img" src="img/logo.png" />
+      </div>
     </header>
 
     <main>
       <div class="main-btn-control">
         <div class="level">
-          <button onclick="onLevel('Beginner')">Beginner</button>
-          <button onclick="onLevel('Intermediate')">Intermediate</button>
-          <button onclick="onLevel('Expert')">Expert</button>
+          <button onclick="onLevel('Easy')">Easy</button>
+          <button onclick="onLevel('Normal')">Normal</button>
+          <button onclick="onLevel('Hard')">Hard</button>
         </div>
         <div class="start-stop-game">
           <button onclick="onStart()">PLAY</button>
@@ -31,7 +33,14 @@
 
       <table></table>
 
-      <div class="main-btn-game"></div>
+      <div class="main-btn-game">
+        <div class="lives">
+          <span>💚 💚 💚</span>
+        </div>
+        <div class="super-laser">
+          <span>🚀 🚀 🚀</span>
+        </div>
+      </div>
 
       <div class="modal">
         <h3></h3>
