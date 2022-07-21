@@ -35,9 +35,6 @@ function renderCell(location, value) {
   elCell.innerHTML = value
 }
 
-function getRandomIntInt(min, max) {
-  return Math.floor(Math.random() * (max - min)) + min
-}
 function openModal(res) {
   const elModal = document.querySelector('.modal')
   const elMsgModal = elModal.querySelector('h3')

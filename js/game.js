@@ -4,9 +4,16 @@ var BOARD_SIZE = 14
 var ALIENS_ROW_LENGTH = 8
 var ALIENS_ROW_COUNT = 3
 const SCORE_ALIEN = 10
-
+{
+  /* <img src="img/alien1.png" >
+<img src="img/alien3.png" >
+<img src="img/alien4.jpeg" ></img> */
+}
 const HERO = '<img src="img/user.png" >'
-const ALIEN = '<img src="img/alien2.jpeg" >'
+const ALIEN1 = '<img src="img/alien1.png" >'
+const ALIEN2 = '<img src="img/alien2.jpeg" >'
+const ALIEN3 = '<img src="img/alien3.png" >'
+const ALIEN4 = '<img src="img/alien4.jpeg" >'
 const SPACESHIP = '🛰'
 const LASER = '🔸'
 const SUPER_LASER = '🚀'
@@ -25,6 +32,7 @@ var gGame = {
   isOn: false,
   aliensCount: 0,
   score: 0,
+  level: 'Normal',
 }
 
 function onInit() {
@@ -40,10 +48,10 @@ function buildBoard() {
   for (var i = 0; i < size; i++) {
     board.push([])
     for (var j = 0; j < size; j++) {
-      board[i][j] = SKY
+      board[i][j] = createCell(SKY)
     }
   }
-  //   console.log('board:', board)
+
   return board
 }
 
@@ -52,10 +60,10 @@ function renderBoard(board) {
   for (var i = 0; i < board.length; i++) {
     strHTML += '<tr>\n'
     for (var j = 0; j < board[i].length; j++) {
-      const cell = board[i][j]
-      const element = getElement(cell)
+      const cell = board[i][j].gameObject
+      // const element = getElement(cell)
       const className = `cell cell-${i}-${j}`
-      strHTML += `<td class="${className} ${element}"> ${cell} </td>\n`
+      strHTML += `<td class="${className} "> ${cell} </td>\n`
     }
     strHTML += '</tr>\n'
   }
@@ -65,21 +73,21 @@ function renderBoard(board) {
   elContainer.innerHTML = strHTML
 }
 
-function getElement(cell) {
-  var element = ''
-  switch (cell) {
-    case HERO:
-      element = 'hero'
-      break
-    case ALIEN:
-      element = 'alien'
-      break
+// function getElement(cell) {
+//   var element = ''
+//   switch (cell) {
+//     case HERO:
+//       element = 'hero'
+//       break
+//     case ALIEN:
+//       element = 'alien'
+//       break
 
-    default:
-      element = 'sky'
-  }
-  return element
-}
+//     default:
+//       element = 'sky'
+//   }
+//   return element
+// }
 
 function onKeyDown(ev) {
   if (!gGame.isOn) return
@@ -113,16 +121,11 @@ function onKeyDown(ev) {
 }
 
 function isValid(pos) {
-  return (
-    pos.i >= 0 &&
-    pos.i < gBoard.length &&
-    pos.j >= 0 &&
-    pos.j < gBoard[0].length
-  )
+  return pos.i >= 0 && pos.i < BOARD_SIZE && pos.j >= 0 && pos.j < BOARD_SIZE
 }
 
-function setScore(score) {
-  gGame.score += score
+function setScore(num) {
+  gGame.score += num
 
   const elScore = document.querySelector('.score h2 span')
   elScore.innerText = gGame.score
@@ -142,14 +145,8 @@ function gameOver() {
 }
 
 function onRestart() {
-  clearInterval(gIntervalAliens)
-  clearInterval(gIntervalSpaceshipId)
-  clearTimeout(gSetTimeId)
-  gAliensTopRowIdx = 0
-  gAliensBottomRowIdx = 2
-  gAliensLeftColIdx = 4
-  gAliensRightColIdx = 9
-  gIsAlienDirection = false
+  setClearIntervalTime()
+  setLevel(gGame.level)
   gAliens = []
   gGame.score = 0
   gLeaser.super.count = 3
@@ -168,28 +165,27 @@ function onStart() {
   gIntervalAliens = setInterval(moveAliens, ALIEN_SPEED)
   gIsAlienFreeze = false
   gIntervalSpaceshipId = setInterval(showSpaceship, 10000)
+  gIsAlienDirection = false
 }
 
 function onStop() {
   gGame.isOn = false
   gIsAlienFreeze = true
-  clearInterval(gIntervalAliens)
-  clearInterval(gIntervalSpaceshipId)
-  clearTimeout(gSetTimeId)
+  setClearIntervalTime()
 }
 function showSpaceship() {
   createSpaceship()
 
-  var spaceship
+  var spaceship = null
 
   if (gSpaceships.length > 1) {
     spaceship = gSpaceships.splice(0, 1)[0]
     removeSpaceships({ i: spaceship.pos.i, j: spaceship.pos.j })
   }
   spaceship = gSpaceships[0]
-
+  createCell(spaceship.sign)
   //update model+DOM  spaceship
-  gBoard[spaceship.pos.i][spaceship.pos.j] = spaceship.sign
+  gBoard[spaceship.pos.i][spaceship.pos.j] = createCell(spaceship.sign)
   renderCell({ i: spaceship.pos.i, j: spaceship.pos.j }, spaceship.sign)
 
   // console.log('gSetTimeId:', gSetTimeId)
@@ -202,26 +198,51 @@ function showSpaceship() {
 }
 
 function onLevel(val) {
-  console.log('val:', val)
   switch (val) {
     case 'Easy':
+      gAliensTopRowIdx = 1
       ALIENS_ROW_LENGTH = 5
       ALIENS_ROW_COUNT = 2
       gAliensBottomRowIdx = 2
       gAliensRightColIdx = 9
+      gAliensLeftColIdx = 4
+      gIsAlienDirection = false
       break
     case 'Normal':
+      gAliensTopRowIdx = 1
       ALIENS_ROW_LENGTH = 8
       ALIENS_ROW_COUNT = 3
       gAliensBottomRowIdx = 3
-      gAliensRightColIdx = 12
+      gAliensRightColIdx = 11
+      gAliensLeftColIdx = 4
+      gIsAlienDirection = false
       break
     case 'Hard':
+      gAliensTopRowIdx = 1
       ALIENS_ROW_LENGTH = 10
       ALIENS_ROW_COUNT = 4
       gAliensBottomRowIdx = 4
       gAliensRightColIdx = 14
+      gAliensLeftColIdx = 4
+      gIsAlienDirection = false
       break
   }
+  gGame.level = val
   onInit()
+}
+
+function createCell(gameObject = null) {
+  return {
+    type: SKY,
+    gameObject: gameObject,
+  }
+}
+
+function setClearIntervalTime() {
+  clearInterval(gIntervalAliens)
+  clearInterval(gIntervalSpaceshipId)
+  clearTimeout(gSetTimeId)
+}
+function setLevel(val) {
+  onLevel(val)
 }

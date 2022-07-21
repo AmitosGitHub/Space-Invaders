@@ -30,7 +30,7 @@ function createHero(board) {
     laser: 'regular',
   }
 
-  board[gHero.pos.i][gHero.pos.j] = HERO
+  board[gHero.pos.i][gHero.pos.j] = createCell(HERO)
 }
 
 function moveHero(step) {
@@ -40,29 +40,38 @@ function moveHero(step) {
   //return if cannot move
   if (!isValid(nextLocation)) return
 
-  var nextCell = gBoard[nextLocation.i][nextLocation.j]
+  var nextCell = gBoard[nextLocation.i][nextLocation.j].gameObject
 
   // return if cannot move
   if (nextCell === WALL) return
 
   //  hitting a alian?  call gameOver
-  if (nextCell === ALIEN) {
-    // gameOver()
+  if (
+    nextCell === ALIEN1 ||
+    nextCell === ALIEN2 ||
+    nextCell === ALIEN3 ||
+    nextCell === ALIEN4
+  ) {
+    gameOver()
     return
   }
 
-  // moving from current position:
-  //  update the model
-  gBoard[gHero.pos.i][gHero.pos.j] = SKY
-  //  update the DOM
-  renderCell(gHero.pos, SKY)
+  updateCell(gHero.pos, SKY)
+  gHero.pos = nextLocation
+  updateCell(gHero.pos, HERO)
+
+  // // moving from current position:
+  // //  update the model
+  // gBoard[gHero.pos.i][gHero.pos.j] = SKY
+  // //  update the DOM
+  // renderCell(gHero.pos, SKY)
 
   //  Move the hero to new location
   //  update the model
-  gHero.pos = nextLocation // {i:2 ,j:3}
-  gBoard[gHero.pos.i][gHero.pos.j] = HERO
-  //  update the DOM
-  renderCell(gHero.pos, HERO)
+  // gHero.pos = nextLocation // {i:2 ,j:3}
+  // gBoard[gHero.pos.i][gHero.pos.j] = HERO
+  // //  update the DOM
+  // renderCell(gHero.pos, HERO)
 }
 
 function getNextLocation(eventKeyboard) {
@@ -102,18 +111,18 @@ function blinkLaser() {
     return
   }
 
-  var nextCell = gBoard[location.i - 1][location.j]
+  var nextCell = gBoard[location.i - 1][location.j].gameObject
 
   if (nextCell === SPACESHIP) {
     setAliensFreeze()
     clearInterval(gIntervalSpaceshipId)
-    gIntervalSpaceshipId = setInterval(showSpaceship, 10000)
 
     clearTimeout(gSetTimeId)
     setScore(50)
     const spaceship = gSpaceships.splice(0, 1)[0]
     removeSpaceships({ i: spaceship.pos.i, j: spaceship.pos.j })
     endBlinkLeaser()
+    gIntervalSpaceshipId = setInterval(showSpaceship, 10000)
     return
   }
   if (nextCell === WALL) {
@@ -121,8 +130,17 @@ function blinkLaser() {
     return
   }
 
-  if (nextCell === ALIEN) {
-    setScore(SCORE_ALIEN)
+  if (
+    nextCell === ALIEN1 ||
+    nextCell === ALIEN2 ||
+    nextCell === ALIEN3 ||
+    nextCell === ALIEN4
+  ) {
+    var alien = getAlien({
+      i: location.i - 1,
+      j: location.j,
+    })
+    setScore(alien.score)
     endBlinkLeaser()
     killAlien(1)
     return
@@ -158,9 +176,9 @@ function shoot(sign) {
     gHero.laser = 'super'
     laser = SUPER_LASER
   }
-
-  gBoard[location.i][location.j] = laser
-  renderCell(location, laser)
+  updateCell(location, laser)
+  // gBoard[location.i][location.j] = laser
+  // renderCell(location, laser)
 
   gIntervalShoot = setInterval(blinkLaser, speed)
 }
@@ -174,7 +192,7 @@ function endBlinkLeaser() {
 function killAlien(num) {
   if (num === 1) {
     gLeaser.pos.i -= 1
-    //model
+
     removeAlien(gLeaser.pos)
     updateCell(gLeaser.pos, SKY)
   } else if (num === 2) {
@@ -190,37 +208,38 @@ function BlowUpNeighbors() {
   clearInterval(gIntervalShoot)
   gHero.isShoot = false
 
-  gBoard[gLeaser.pos.i][gLeaser.pos.j] = BOOM
-  renderCell(gLeaser.pos, BOOM)
+  updateCell(gLeaser.pos, BOOM)
 
   killAlien(2)
 
   setTimeout(() => {
-    gBoard[gLeaser.pos.i][gLeaser.pos.j] = SKY
-    renderCell(gLeaser.pos, SKY)
+    updateCell(gLeaser.pos, SKY)
   }, 300)
 }
 
 function killAroundAlien(pos) {
   gIsAlienFreeze = true
-  console.log('gGame.aliensCount:', gGame.aliensCount)
+
   for (var i = pos.i - 1; i <= pos.i + 1; i++) {
     if (i < 0 || i > BOARD_SIZE - 1) continue
     for (var j = pos.j - 1; j <= pos.j + 1; j++) {
       if (j < 0 || j > BOARD_SIZE - 1) continue
       if (i === pos.i && pos.j === j) continue
 
-      const cell = gBoard[i][j]
+      const cell = gBoard[i][j].gameObject
 
-      if (cell === ALIEN) {
-        const location = { i: i, j: j }
+      if (
+        cell === ALIEN1 ||
+        cell === ALIEN2 ||
+        cell === ALIEN3 ||
+        cell === ALIEN4
+      ) {
+        var location = { i: i, j: j }
         const alien = getAlien(location)
         //model
         setScore(alien.score)
         removeAlien(location)
-        gBoard[i][j] = SKY
-        //DOM
-        renderCell(location, SKY)
+        updateCell(location, SKY)
       }
     }
   }
@@ -228,7 +247,7 @@ function killAroundAlien(pos) {
 }
 
 function updateCell(location, element) {
-  gBoard[location.i][location.j] = element
+  gBoard[location.i][location.j] = createCell(element)
   renderCell(location, element)
 }
 
