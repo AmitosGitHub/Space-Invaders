@@ -3,6 +3,7 @@
 }
 
 body {
+  background-image: url(../img/sky-start.webp);
   margin: 0px;
   padding: 0px;
   background-color: black;
@@ -18,69 +19,93 @@ body {
 
 /*------------*/
 header {
-  height: 200px;
+  height: 20%;
 }
 
 main {
   background-image: url(../img/space-bck.jpeg);
   background-size: cover;
-  height: 1000px;
-  width: 1000px;
+  height: 80%;
+  width: 80%;
   border: 2px solid whitesmoke;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  /* margin-bottom: 10px; */
 }
 
-footer {
-  height: 100px;
-}
+/* footer {
+  height: 1px;
+} */
 /*-----sub-main------*/
 
 .main-btn-control {
-  height: 100px;
+  height: 10%;
   width: 97%;
-  border: 1px solid whitesmoke;
   display: flex;
   justify-content: space-around;
+  margin-top: 10px;
 }
 
 .table {
-  height: 700px;
-  width: 700px;
+  margin-top: 50px;
+  height: 70%;
+  width: 90%;
   border: 1px solid whitesmoke;
 }
 .main-btn-game {
-  height: 100px;
-  width: 720px;
-  border: 1px solid whitesmoke;
+  height: 10%;
+  width: 100%;
+  /* border: 1px solid whitesmoke; */
   display: flex;
   align-items: center;
   justify-content: space-around;
 }
 .main-btn-game .lives {
-  font-size: 50px;
+  font-size: 40px;
 }
 .main-btn-game .super-laser {
-  font-size: 50px;
+  font-size: 40px;
+}
+.main-btn-game .shields {
+  font-size: 40px;
+}
+.shieldsOn {
+  box-shadow: 7px -20px 11px 5px #10bb22;
 }
 /*----sub-table---*/
 
 .cell {
-  width: 50px;
-  height: 50px;
-  /* border: 1px solid rgb(102, 98, 98); */
+  width: 45px;
+  height: 40px;
+  /* border: 1px solid rgb(102, 98, 98);   */
 }
-
+/*----modal---*/
 .modal {
   width: 500px;
   height: 500px;
   border: 2px solid greenyellow;
   background-image: linear-gradient(to right top, gray, rgb(182, 171, 171));
+  background-image: url(../img/gameover.png);
   position: absolute;
   display: none;
 }
+.modal h3 {
+  font-size: 80px;
+  color: rgb(236, 41, 187);
+}
+
+.modal button {
+  width: 260px;
+  padding: 10px;
+  font-size: 30px;
+  border-radius: 20px;
+  color: rgb(223, 213, 214);
+  border: 2px solid greenyellow;
+  background-image: linear-gradient(to right top, rgb(53, 204, 218), black);
+}
+
 /*-----main-btn-control ------*/
 .start-stop-game {
   margin-top: 30px;
@@ -92,7 +117,10 @@ footer {
   border-radius: 20px;
   background-image: linear-gradient(to right top, yellow, black);
 }
-
+button:hover {
+  cursor: pointer;
+  outline: 4px solid rgb(250, 252, 247);
+}
 .level {
   /* margin-top: 30px; */
   display: flex;
@@ -115,5 +143,5 @@ img {
 .logo-img {
   width: 1000px;
   height: 200px;
-  border: 1px solid whitesmoke;
+  /* border: 1px solid whitesmoke; */
 }

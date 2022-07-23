@@ -25,7 +25,7 @@ function updateTime() {
 }
 
 function playSound() {
-  var sound = new Audio('audio/popBtn.mp3')
+  var sound = new Audio('sound/laser.wav')
   sound.play()
 }
 // location such as: {i: 2, j: 7}
@@ -39,7 +39,7 @@ function openModal(res) {
   const elModal = document.querySelector('.modal')
   const elMsgModal = elModal.querySelector('h3')
 
-  const msg = res === 'win' ? 'VICTORY' : 'GAME OVER'
+  const msg = res === 'win' ? 'VICTORY' : 'YOU LOSE'
 
   elMsgModal.innerText = msg
   elModal.style.display = 'block'

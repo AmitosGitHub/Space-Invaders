@@ -14,19 +14,21 @@ const ALIEN1 = '<img src="img/alien1.png" >'
 const ALIEN2 = '<img src="img/alien2.jpeg" >'
 const ALIEN3 = '<img src="img/alien3.png" >'
 const ALIEN4 = '<img src="img/alien4.jpeg" >'
-const SPACESHIP = '🛰'
+const SPACESHIP = '<img src="img/spaceship.jpeg" >'
 const LASER = '🔸'
 const SUPER_LASER = '🚀'
 const ALIEN_LASER = '🔻'
 const SKY = ' '
-const WALL = 'X'
+const WALL1 = '<img src="img/wall1.png" >'
+const WALL2 = '<img src="img/wall2.jpeg" >'
 const BOOM = '💥'
 const LIVES = '💚'
+const ALIEN_SHOOT = '❄️'
+const Shields = '🛡'
 
 var gSetTimeId
 var gIntervalSpaceshipId
-
-// Matrix of cell objects. e.g.: {type: SKY, gameObject: ALIEN}
+var gWalls
 var gBoard
 var gGame = {
   isOn: false,
@@ -40,6 +42,8 @@ function onInit() {
   createHero(gBoard)
   createAliens(gBoard)
   renderBoard(gBoard)
+  createWalls()
+  printWallBoard()
 }
 
 function buildBoard() {
@@ -73,22 +77,6 @@ function renderBoard(board) {
   elContainer.innerHTML = strHTML
 }
 
-// function getElement(cell) {
-//   var element = ''
-//   switch (cell) {
-//     case HERO:
-//       element = 'hero'
-//       break
-//     case ALIEN:
-//       element = 'alien'
-//       break
-
-//     default:
-//       element = 'sky'
-//   }
-//   return element
-// }
-
 function onKeyDown(ev) {
   if (!gGame.isOn) return
   switch (ev.code) {
@@ -109,6 +97,7 @@ function onKeyDown(ev) {
       break
     case 'KeyZ':
       console.log('hiiKeyZ')
+      playShield()
       break
     case 'KeyX':
       shoot('SUPER_LASER')
@@ -124,19 +113,13 @@ function isValid(pos) {
   return pos.i >= 0 && pos.i < BOARD_SIZE && pos.j >= 0 && pos.j < BOARD_SIZE
 }
 
-function setScore(num) {
-  gGame.score += num
-
-  const elScore = document.querySelector('.score h2 span')
-  elScore.innerText = gGame.score
-}
-
+//---GAME OVER-----
 function checkGameOver() {
   return gGame.aliensCount === 0
 }
 function gameOver() {
   onStop()
-  gGame.isOn = false
+
   if (gGame.aliensCount === 0) {
     openModal('win')
   } else {
@@ -144,19 +127,19 @@ function gameOver() {
   }
 }
 
+//----BTN GAME---------
 function onRestart() {
   setClearIntervalTime()
-  setLevel(gGame.level)
-  gAliens = []
   gGame.score = 0
-  gLeaser.super.count = 3
-  gGame.aliensCount = 0
   setScore(0)
+  gGame.aliensCount = 0
+  gAliens = []
+  setLevel()
   closeModal()
-  onInit()
+  setBtmGame()
   gGame.isOn = false
+  gIsAliensShoot = false
 }
-
 function onStart() {
   gGame.isOn = true
   if (gIntervalAliens) {
@@ -164,15 +147,43 @@ function onStart() {
   }
   gIntervalAliens = setInterval(moveAliens, ALIEN_SPEED)
   gIsAlienFreeze = false
-  gIntervalSpaceshipId = setInterval(showSpaceship, 10000)
-  gIsAlienDirection = false
-}
 
+  if (gIntervalSpaceshipId) {
+    clearInterval(gIntervalSpaceshipId)
+  }
+  gIntervalSpaceshipId = setInterval(showSpaceship, 10000)
+  if (gIntervalAliensShooter) {
+    clearInterval(gIntervalAliensShooter)
+  }
+  gIntervalAliensShooter = setInterval(playAliensShoot, 4000)
+}
 function onStop() {
   gGame.isOn = false
   gIsAlienFreeze = true
   setClearIntervalTime()
 }
+function setScore(num) {
+  gGame.score += num
+
+  const elScore = document.querySelector('.score h2 span')
+  elScore.innerText = gGame.score
+}
+function setBtmGame() {
+  gHero.lives = 3
+  gLaser.super.count = 3
+
+  const elBtn = document.querySelector('.main-btn-game')
+
+  const elLives = elBtn.querySelector('.lives span')
+  elLives.innerText = `${LIVES + LIVES + LIVES}`
+
+  const elShields = elBtn.querySelector('.shields span')
+  elShields.innerText = `${SUPER_LASER + SUPER_LASER + SUPER_LASER}`
+
+  const elSuper = elBtn.querySelector('.super-laser span')
+  elSuper.innerText = `${Shields + Shields + Shields}`
+}
+
 function showSpaceship() {
   createSpaceship()
 
@@ -201,27 +212,27 @@ function onLevel(val) {
   switch (val) {
     case 'Easy':
       gAliensTopRowIdx = 1
+      gAliensBottomRowIdx = 2
       ALIENS_ROW_LENGTH = 5
       ALIENS_ROW_COUNT = 2
-      gAliensBottomRowIdx = 2
       gAliensRightColIdx = 9
       gAliensLeftColIdx = 4
       gIsAlienDirection = false
       break
     case 'Normal':
       gAliensTopRowIdx = 1
+      gAliensBottomRowIdx = 3
       ALIENS_ROW_LENGTH = 8
       ALIENS_ROW_COUNT = 3
-      gAliensBottomRowIdx = 3
-      gAliensRightColIdx = 11
+      gAliensRightColIdx = 12
       gAliensLeftColIdx = 4
       gIsAlienDirection = false
       break
     case 'Hard':
       gAliensTopRowIdx = 1
+      gAliensBottomRowIdx = 4
       ALIENS_ROW_LENGTH = 10
       ALIENS_ROW_COUNT = 4
-      gAliensBottomRowIdx = 4
       gAliensRightColIdx = 14
       gAliensLeftColIdx = 4
       gIsAlienDirection = false
@@ -241,8 +252,75 @@ function createCell(gameObject = null) {
 function setClearIntervalTime() {
   clearInterval(gIntervalAliens)
   clearInterval(gIntervalSpaceshipId)
+  clearInterval(gIntervalAliensShooter)
   clearTimeout(gSetTimeId)
 }
-function setLevel(val) {
+function setLevel() {
+  const val = gGame.level
   onLevel(val)
+}
+
+function playShield() {
+  console.log('playShield()')
+  console.log('gHero.Shields', gHero.shields)
+  if (gHero.shields > 0) {
+    gHero.shields--
+    gIsShield = true
+    const elHero = document.querySelector(`.cell-${gHero.pos.i}-${gHero.pos.j}`)
+    console.log('elHero:', elHero)
+    elHero.classList.add('shieldsOn')
+    updateShields()
+
+    setTimeout(() => {
+      gIsShield = false
+      elHero.classList.remove('shieldsOn')
+    }, 5000)
+  }
+}
+
+//----wall------
+
+function createWalls() {
+  gWalls = [
+    { pos: { i: 11, j: 1 }, lives: 2 },
+    { pos: { i: 11, j: 2 }, lives: 2 },
+    { pos: { i: 11, j: 11 }, lives: 2 },
+    { pos: { i: 11, j: 12 }, lives: 2 },
+  ]
+}
+
+function printWallBoard() {
+  for (var i = 0; i < gWalls.length; i++) {
+    const wall = gWalls[i]
+    updateCell(wall.pos, WALL1)
+  }
+}
+
+function updateWalls() {
+  if (!gWalls) return
+
+  for (var i = 0; i < gWalls.length; i++) {
+    const wall = gWalls[i]
+    if (wall.lives === 2) continue
+    if (wall.lives === 1) {
+      updateCell(wall.pos, WALL2)
+    }
+    if (wall.lives === 0) {
+      updateCell(wall.pos, SKY)
+      gWalls.splice(i, 1)
+    }
+  }
+}
+function removeLivesWall(location) {
+  const wall = getWall(location)
+  wall.lives--
+}
+
+function getWall(location) {
+  for (var i = 0; i < gWalls.length; i++) {
+    const wall = gWalls[i]
+    if (wall.pos.i === location.i && wall.pos.j === location.j) {
+      return wall
+    }
+  }
 }
